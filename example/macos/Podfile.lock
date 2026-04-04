@@ -1,6 +1,6 @@
 PODS:
   - FlutterMacOS (1.0.0)
-  - heic_native (0.1.0):
+  - heic_native (0.1.1):
     - FlutterMacOS
 
 DEPENDENCIES:

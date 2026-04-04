@@ -29,7 +29,7 @@ A Flutter plugin that converts HEIC/HEIF images to PNG using native platform API
 
 ```yaml
 dependencies:
-  heic_native: ^0.1.0
+  heic_native: ^0.1.1
 ```
 
 ### iOS

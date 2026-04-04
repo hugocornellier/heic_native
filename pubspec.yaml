@@ -1,6 +1,6 @@
 name: heic_native
 description: "A Flutter plugin that converts HEIC/HEIF images to PNG using native platform APIs (iOS, Android, macOS, Windows, Linux)."
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/hugocornellier/heic_native
 homepage: https://github.com/hugocornellier/heic_native
 issue_tracker: https://github.com/hugocornellier/heic_native/issues

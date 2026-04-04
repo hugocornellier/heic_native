@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'heic_native'
-  s.version          = '0.1.0'
+  s.version          = '0.1.1'
   s.summary          = 'Convert HEIC/HEIF images to PNG using native iOS APIs.'
   s.description      = <<-DESC
 A Flutter plugin that converts HEIC/HEIF images to PNG format using CoreGraphics and ImageIO on iOS.

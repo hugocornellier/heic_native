@@ -104,7 +104,7 @@ public class HeicNativePlugin: NSObject, FlutterPlugin {
     if let srcProps = CGImageSourceCopyPropertiesAtIndex(source, idx, nil)
                        as? [CFString: Any] {
       for (k, v) in srcProps {
-        // Skip the top-level orientation — PNG does not use it;
+        // Skip the top-level orientation, PNG does not use it;
         // orientation is expressed inside the EXIF sub-dictionary.
         if k == kCGImagePropertyOrientation { continue }
         if k == kCGImagePropertyPNGDictionary { continue }

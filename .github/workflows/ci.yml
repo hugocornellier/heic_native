@@ -295,7 +295,7 @@ jobs:
           xcrun simctl boot "$DEVICE_ID"
           # Block until the simulator is fully booted.
           xcrun simctl bootstatus "$DEVICE_ID" -b
-          # Launch Simulator.app so the UI runloop is active — avoids
+          # Launch Simulator.app so the UI runloop is active, avoids
           # a race where flutter test installs the app before the
           # runtime is ready to accept debug connections.
           open -a Simulator --args -CurrentDeviceUDID "$DEVICE_ID"
@@ -312,7 +312,7 @@ jobs:
       # flutter test on iOS simulators can hang indefinitely waiting for
       # the Dart VM Service connection (simulators.dart has no timeout on
       # that await). Use a retry loop with process cleanup and simulator
-      # reboot — same defensive pattern as the macOS job.
+      # reboot, same defensive pattern as the macOS job.
       - name: Run integration tests on iOS simulator
         working-directory: example
         timeout-minutes: 15
@@ -327,7 +327,7 @@ jobs:
             pkill -9 -f "Runner" 2>/dev/null || true
             pkill -9 -f "Flutter" 2>/dev/null || true
             sleep 2
-            # Run with a 4-minute timeout per attempt — if the VM
+            # Run with a 4-minute timeout per attempt, if the VM
             # connection hangs, we want to kill and retry quickly rather
             # than burn the full step timeout on a single hung attempt.
             LOG_FILE="$RUNNER_TEMP/ios_test_attempt_${attempt}.log"
@@ -343,7 +343,7 @@ jobs:
             echo "Attempt $attempt failed (exit code $EXIT_CODE)."
             # If tests actually ran and reported failures, don't retry.
             if grep -qE "Some tests failed" "$LOG_FILE" 2>/dev/null; then
-              echo "Tests ran but had failures — not retrying."
+              echo "Tests ran but had failures, not retrying."
               exit 1
             fi
             echo "No test output or VM connection hang. Retrying..."

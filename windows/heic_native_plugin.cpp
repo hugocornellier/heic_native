@@ -484,7 +484,7 @@ HeicNativePlugin::HeicNativePlugin()
 }
 
 HeicNativePlugin::~HeicNativePlugin() {
-  // Shut down worker thread first — it may be mid-conversion using libheif.
+  // Shut down worker thread first, it may be mid-conversion using libheif.
   {
     std::lock_guard<std::mutex> lock(queue_mutex_);
     shutting_down_ = true;
@@ -528,7 +528,7 @@ void HeicNativePlugin::WorkerLoop() {
 
 void HeicNativePlugin::PostResultToMainThread(std::function<void()> cb) {
   if (!flutter_window_ || shutting_down_.load()) {
-    // No window or shutting down — drop the callback silently.
+    // No window or shutting down, drop the callback silently.
     return;
   }
   {
@@ -556,11 +556,11 @@ LRESULT CALLBACK HeicNativePlugin::ResultSubclassProc(HWND hwnd, UINT msg,
     return 0;
   }
   if (msg == WM_NCDESTROY) {
-    // Window is being destroyed — stop using this HWND.
+    // Window is being destroyed, stop using this HWND.
     auto *p = reinterpret_cast<HeicNativePlugin *>(ref);
     RemoveWindowSubclass(hwnd, ResultSubclassProc, id);
     p->flutter_window_ = nullptr;
-    // Don't return 0 — let DefSubclassProc handle WM_NCDESTROY.
+    // Don't return 0, let DefSubclassProc handle WM_NCDESTROY.
   }
   return DefSubclassProc(hwnd, msg, wp, lp);
 }
