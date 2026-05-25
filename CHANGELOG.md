@@ -1,3 +1,7 @@
+## 0.1.2
+
+* Raise minimum deployment targets to iOS 13.0 / macOS 10.15 to satisfy Swift Package Manager's `FlutterFramework` requirement (fixes SPM build failures).
+
 ## 0.1.1
 
 * Update documentation

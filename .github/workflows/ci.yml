@@ -17,7 +17,7 @@ jobs:
     name: Format, Analyze & Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: subosito/flutter-action@v2
         with:
@@ -50,7 +50,7 @@ jobs:
     name: Build Android
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-java@v4
         with:
@@ -68,7 +68,7 @@ jobs:
           cache: true
 
       - name: Cache Gradle
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.gradle/caches
@@ -84,7 +84,7 @@ jobs:
     name: Build iOS
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: subosito/flutter-action@v2
         with:
@@ -92,7 +92,7 @@ jobs:
           cache: true
 
       - name: Cache CocoaPods
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: example/ios/Pods
           key: pods-ios-${{ hashFiles('example/ios/Podfile.lock') }}
@@ -106,19 +106,12 @@ jobs:
     name: Build macOS
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-
-      - name: Cache CocoaPods
-        uses: actions/cache@v4
-        with:
-          path: example/macos/Pods
-          key: pods-macos-${{ hashFiles('example/macos/Podfile.lock') }}
-          restore-keys: pods-macos-
 
       - name: Build macOS
         run: flutter build macos --debug
@@ -128,7 +121,7 @@ jobs:
     name: Build Linux
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install dependencies
         run: |
@@ -149,7 +142,7 @@ jobs:
     name: Build Windows
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up vcpkg
         uses: lukka/run-vcpkg@v11
@@ -209,7 +202,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-java@v4
         with:
@@ -227,7 +220,7 @@ jobs:
           cache: true
 
       - name: Cache Gradle
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.gradle/caches
@@ -262,7 +255,7 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: subosito/flutter-action@v2
         with:
@@ -270,7 +263,7 @@ jobs:
           cache: true
 
       - name: Cache CocoaPods
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: example/ios/Pods
           key: pods-ios-${{ hashFiles('example/ios/Podfile.lock') }}
@@ -377,19 +370,12 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-
-      - name: Cache CocoaPods
-        uses: actions/cache@v4
-        with:
-          path: example/macos/Pods
-          key: pods-macos-${{ hashFiles('example/macos/Podfile.lock') }}
-          restore-keys: pods-macos-
 
       - name: Install example dependencies
         run: flutter pub get
@@ -435,7 +421,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install dependencies
         run: |
@@ -500,7 +486,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up vcpkg
         uses: lukka/run-vcpkg@v11
