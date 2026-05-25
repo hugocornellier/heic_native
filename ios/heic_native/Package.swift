@@ -8,7 +8,7 @@ let package = Package(
         .iOS("13.0")
     ],
     products: [
-        .library(name: "heic_native", targets: ["heic_native"])
+        .library(name: "heic-native", targets: ["heic_native"])
     ],
     dependencies: [
         .package(name: "FlutterFramework", path: "../FlutterFramework")

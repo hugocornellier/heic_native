@@ -1,6 +1,7 @@
-## 0.1.2
+## 1.0.0
 
 * Raise minimum deployment targets to iOS 13.0 / macOS 10.15 to satisfy Swift Package Manager's `FlutterFramework` requirement (fixes SPM build failures).
+* Fix Swift Package Manager product names for iOS and macOS so Flutter can resolve the `heic-native` plugin product.
 
 ## 0.1.1
 
