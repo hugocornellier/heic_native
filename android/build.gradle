@@ -21,7 +21,16 @@ rootProject.allprojects {
 }
 
 apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
+
+// AGP 9 ships built-in Kotlin and rejects the legacy Kotlin Gradle Plugin
+// ("The 'org.jetbrains.kotlin.android' plugin is no longer required ...").
+// Apply KGP only on AGP < 9; on AGP >= 9 built-in Kotlin compiles the sources.
+// Declaring it here (even guarded) also stops the Flutter Gradle plugin from
+// auto-applying KGP to this module, which AGP 9 would otherwise reject.
+def agpMajor = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')[0] as int
+if (agpMajor < 9) {
+    apply plugin: "kotlin-android"
+}
 
 android {
     namespace = "com.hugocornellier.heic_native"
@@ -32,9 +41,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
-    }
 
     defaultConfig {
         minSdk = 28
@@ -62,4 +68,17 @@ android {
 }
 
 dependencies {
+}
+
+
+// Pin the Kotlin JVM target to match Java when a Kotlin compile task exists
+// (legacy KGP on AGP < 9, or built-in Kotlin on AGP >= 9). Guarded so an AGP 9
+// setup without built-in Kotlin (no kotlin extension) is skipped instead of
+// erroring on the kotlin {} DSL.
+if (project.extensions.findByName("kotlin") != null) {
+    kotlin {
+        compilerOptions {
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8
+        }
+    }
 }

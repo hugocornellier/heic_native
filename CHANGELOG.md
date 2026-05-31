@@ -1,3 +1,13 @@
+## 1.0.1
+
+* Fix Android builds under AGP 9 / Flutter 3.44+ with built-in Kotlin. The
+  plugin previously applied the legacy Kotlin Gradle Plugin unconditionally,
+  which AGP 9 rejects ("The 'org.jetbrains.kotlin.android' plugin is no longer
+  required since AGP 9.0"). The Android build script now applies `kotlin-android`
+  only on AGP < 9 and lets built-in Kotlin compile the sources on AGP >= 9, with
+  the Kotlin JVM target pinned to 8 (unchanged). Verified building under AGP 9.0.1
+  with built-in Kotlin enabled. No API or minimum-version changes.
+
 ## 1.0.0
 
 * Raise minimum deployment targets to iOS 13.0 / macOS 10.15 to satisfy Swift Package Manager's `FlutterFramework` requirement (fixes SPM build failures).

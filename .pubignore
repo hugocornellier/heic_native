@@ -1,0 +1,14 @@
+# Build / tooling artifacts
+.dart_tool/
+build/
+.idea/
+*.iml
+**/doc/api/
+
+# Example test fixtures (sample HEIC images): used only by the example app.
+example/assets/
+
+# Example Podfiles (gitignored; not needed in the published tarball).
+# Native libraries under android/, linux/, windows/ ARE required and intentionally shipped.
+example/**/Podfile
+example/**/Podfile.lock
