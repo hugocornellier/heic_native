@@ -1,8 +1,25 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
+
 plugins {
     id("com.android.application")
-    id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// On AGP >= 9 with built-in Kotlin enabled (the default), built-in Kotlin compiles
+// the app, so the Kotlin Android plugin (KGP) must NOT be applied. If built-in
+// Kotlin is disabled (android.builtInKotlin=false), KGP is required. On AGP < 9 it
+// is always required.
+val agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
+    .substringBefore('.')
+    .toInt()
+val builtInKotlinProperty = providers.gradleProperty("android.builtInKotlin").orNull
+val isBuiltInKotlinEnabled = agpVersion >= 9 && (builtInKotlinProperty == null || builtInKotlinProperty.toBoolean())
+val shouldApplyKotlinAndroidPlugin = agpVersion < 9 || !isBuiltInKotlinEnabled
+
+if (shouldApplyKotlinAndroidPlugin) {
+    apply(plugin = "org.jetbrains.kotlin.android")
 }
 
 android {
@@ -13,10 +30,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     defaultConfig {
@@ -36,6 +49,15 @@ android {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
+    }
+}
+
+// Pin the Kotlin JVM target to match Java 17. Guarded so an AGP 9 setup without a
+// Kotlin extension registered (built-in Kotlin disabled and KGP not applied) is
+// skipped rather than erroring on the Kotlin DSL.
+extensions.findByType<KotlinAndroidProjectExtension>()?.apply {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
     }
 }
 

@@ -22,13 +22,18 @@ rootProject.allprojects {
 
 apply plugin: "com.android.library"
 
-// AGP 9 ships built-in Kotlin and rejects the legacy Kotlin Gradle Plugin
-// ("The 'org.jetbrains.kotlin.android' plugin is no longer required ...").
-// Apply KGP only on AGP < 9; on AGP >= 9 built-in Kotlin compiles the sources.
-// Declaring it here (even guarded) also stops the Flutter Gradle plugin from
-// auto-applying KGP to this module, which AGP 9 would otherwise reject.
+// Kotlin plugin selection across AGP versions. On AGP >= 9 with built-in Kotlin
+// enabled (the default), built-in Kotlin compiles the sources and KGP must NOT be
+// applied. But if built-in Kotlin is disabled (android.builtInKotlin=false, which
+// the Flutter AGP-9 migrator adds to consumer apps), KGP is the only Kotlin
+// compiler, so it MUST be applied; otherwise this plugin's Kotlin classes never
+// compile and the consumer app fails with "cannot find class HeicNativePlugin".
+// On AGP < 9 there is no built-in Kotlin, so KGP is always required.
 def agpMajor = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')[0] as int
-if (agpMajor < 9) {
+def builtInKotlinProperty = providers.gradleProperty("android.builtInKotlin").orNull
+def isBuiltInKotlinEnabled = agpMajor >= 9 && (builtInKotlinProperty == null || builtInKotlinProperty.toBoolean())
+def shouldApplyKotlinAndroidPlugin = agpMajor < 9 || !isBuiltInKotlinEnabled
+if (shouldApplyKotlinAndroidPlugin) {
     apply plugin: "kotlin-android"
 }
 
