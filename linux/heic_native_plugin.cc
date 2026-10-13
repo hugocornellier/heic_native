@@ -6,6 +6,7 @@
 #include <climits>
 #include <cstdio>
 #include <cstring>
+#include <string>
 #include <unistd.h>
 #include <vector>
 
@@ -80,8 +81,23 @@ static void png_write_to_vector(png_structp png_ptr, png_bytep data,
 
 static void png_flush_noop(png_structp /*png_ptr*/) {}
 
+// Describes a libheif failure for the error sent back to Dart: which step
+// failed, libheif's own message, and the libheif version actually loaded.
+// The version matters on Linux, where a packaging mistake can land the plugin
+// on a system libheif instead of the bundled one.
+static std::string describe_heif_error(const char* step, const heif_error& err) {
+  std::string text = step;
+  text += ": ";
+  text += (err.message != nullptr) ? err.message : "unknown error";
+  text += " (libheif ";
+  text += heif_get_version();
+  text += ")";
+  return text;
+}
+
 // Decode a HEIC file into raw RGBA pixels.
 // Returns true on success; fills out width, height, stride, and pixels.
+// On failure, out_error says which step failed and why.
 // Caller must call heif_image_release(out_img) and
 // heif_image_handle_release(out_handle) when done.
 static bool decode_heic(const char* input_path,
@@ -92,12 +108,17 @@ static bool decode_heic(const char* input_path,
                         int* out_height,
                         int* out_stride,
                         const uint8_t** out_pixels,
-                        bool* out_has_alpha) {
+                        bool* out_has_alpha,
+                        std::string* out_error) {
   heif_context* ctx = heif_context_alloc();
-  if (!ctx) return false;
+  if (!ctx) {
+    *out_error = "heif_context_alloc returned null";
+    return false;
+  }
 
   heif_error err = heif_context_read_from_file(ctx, input_path, nullptr);
   if (err.code != heif_error_Ok) {
+    *out_error = describe_heif_error("reading the file", err);
     heif_context_free(ctx);
     return false;
   }
@@ -105,6 +126,7 @@ static bool decode_heic(const char* input_path,
   heif_image_handle* handle = nullptr;
   err = heif_context_get_primary_image_handle(ctx, &handle);
   if (err.code != heif_error_Ok) {
+    *out_error = describe_heif_error("getting the primary image", err);
     heif_context_free(ctx);
     return false;
   }
@@ -116,6 +138,7 @@ static bool decode_heic(const char* input_path,
                           has_alpha ? heif_chroma_interleaved_RGBA : heif_chroma_interleaved_RGB,
                           nullptr);
   if (err.code != heif_error_Ok) {
+    *out_error = describe_heif_error("decoding the image", err);
     heif_image_handle_release(handle);
     heif_context_free(ctx);
     return false;
@@ -530,11 +553,13 @@ static FlMethodResponse* do_convert_work(const char* input_path,
   const uint8_t* pixels = nullptr;
   bool has_alpha = false;
 
+  std::string decode_error;
   bool ok = decode_heic(input_path, &ctx, &handle, &img, &width, &height,
-                        &stride, &pixels, &has_alpha);
+                        &stride, &pixels, &has_alpha, &decode_error);
   if (!ok) {
+    std::string message = "Failed to decode HEIC file, " + decode_error;
     return FL_METHOD_RESPONSE(fl_method_error_response_new(
-        "decode_failed", "Failed to decode HEIC file", nullptr));
+        "decode_failed", message.c_str(), nullptr));
   }
 
   HeicMetadata meta;
@@ -598,11 +623,13 @@ static FlMethodResponse* do_convert_to_bytes_work(const char* input_path,
   const uint8_t* pixels = nullptr;
   bool has_alpha = false;
 
+  std::string decode_error;
   bool ok = decode_heic(input_path, &ctx, &handle, &img, &width, &height,
-                        &stride, &pixels, &has_alpha);
+                        &stride, &pixels, &has_alpha, &decode_error);
   if (!ok) {
+    std::string message = "Failed to decode HEIC file, " + decode_error;
     return FL_METHOD_RESPONSE(fl_method_error_response_new(
-        "decode_failed", "Failed to decode HEIC file", nullptr));
+        "decode_failed", message.c_str(), nullptr));
   }
 
   HeicMetadata meta;
@@ -804,6 +831,19 @@ static void method_call_cb(FlMethodChannel* /*channel*/,
 }
 
 void heic_native_plugin_register_with_registrar(FlPluginRegistrar* registrar) {
+  // Load libheif's codec plugins. On its own, libheif only registers the
+  // codecs compiled into it; decoders built as external plugins, which is how
+  // Debian and Ubuntu package libheif, are loaded by heif_init(). Without this
+  // call, a build that ends up on such a libheif parses HEIC containers fine
+  // but cannot decode a single image. The Windows plugin has always called it.
+  // There is deliberately no matching heif_deinit(): libheif must not be torn
+  // down during process exit (see the Windows plugin for the details).
+  heif_error init_err = heif_init(nullptr);
+  if (init_err.code != heif_error_Ok) {
+    g_warning("heic_native: heif_init failed: %s",
+              init_err.message != nullptr ? init_err.message : "unknown error");
+  }
+
   HeicNativePlugin* plugin = HEIC_NATIVE_PLUGIN(
       g_object_new(heic_native_plugin_get_type(), nullptr));
 
