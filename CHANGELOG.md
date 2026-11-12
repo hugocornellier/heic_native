@@ -17,6 +17,15 @@
   `package:material_ui`.
 * Linux: the native unit tests built with the example fetch googletest 1.16
   instead of 1.11, which CMake 4 no longer configures.
+* Linux: call `heif_init()` when the plugin registers, as the Windows plugin
+  already did. libheif asks for it before any other call so that decoder
+  plugins, which is how Debian and Ubuntu package libheif, are registered;
+  current libheif releases also load them lazily, so this is hardening rather
+  than a fix for a known failure. No `heif_deinit()` is called, for the same
+  teardown reason as on Windows.
+* Linux: `decode_failed` errors now say which libheif step failed, libheif's own
+  message, and the libheif version that was loaded, instead of a bare
+  "Failed to decode HEIC file".
 
 ## 1.1.0
 
