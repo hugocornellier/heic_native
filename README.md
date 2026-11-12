@@ -40,17 +40,8 @@ No additional setup needed (iOS 13.0+).
 
 ### Android
 
-Requires Android 9 (API 28) or later (native HEIF decoder support).
-
-Set `minSdk = 28` in your app's `android/app/build.gradle.kts`:
-
-```kotlin
-android {
-    defaultConfig {
-        minSdk = 28
-    }
-}
-```
+Requires Android 7.0 (API 24) or later. Flutter's default `minSdk` works with no
+change.
 
 ### macOS
 

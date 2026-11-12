@@ -7,6 +7,9 @@
   Android builds on Flutter 3.50 no longer warn "Your app uses the following
   plugins that apply Kotlin Gradle Plugin (KGP): heic_native". The plugin's Java
   and Kotlin targets are now 17.
+* Android: supports Android 7.0 (API 24) and later, down from Android 9 (API 28),
+  so apps keep Flutter's default `minSdk` (24) with no change. The plugin bundles
+  its own libheif, libde265 and libpng and never used Android's HEIF decoder.
 * Requires Flutter 3.44 or newer (Dart 3.12), because the migration needs
   KGP 2.0 or newer, which Flutter enforces from 3.44.
 * Example app: Android moved to Gradle 9.5.0, AGP 9.3.1 and Kotlin 2.4.20 (the
