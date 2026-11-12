@@ -332,7 +332,7 @@ jobs:
               --no-pub --reporter expanded 2>&1 | tee "$LOG_FILE"
             EXIT_CODE=${PIPESTATUS[0]}
             set -e
-            if [ "$EXIT_CODE" -eq 0 ] && grep -qE "(All tests passed|[0-9]+ tests? passed)" "$LOG_FILE"; then
+            if [ "$EXIT_CODE" -eq 0 ] && grep -qE "(All tests passed|[1-9][0-9]* tests? passed\.)" "$LOG_FILE"; then
               echo "Tests passed on attempt $attempt."
               exit 0
             fi
@@ -404,7 +404,7 @@ jobs:
             OUTPUT=$(flutter test "integration_test/$f" -d macos 2>&1) || true
             echo "$OUTPUT"
             if echo "$OUTPUT" | grep -q "Some tests failed" || \
-               ! echo "$OUTPUT" | grep -qE "(All tests passed|[0-9]+ tests? passed)"; then
+               ! echo "$OUTPUT" | grep -qE "(All tests passed|[1-9][0-9]* tests? passed\.)"; then
               FAILED+=("$f")
               echo "::error::FAILED: $f"
             fi
@@ -464,7 +464,7 @@ jobs:
             sleep 2
             flutter test "integration_test/$f" -d linux 2>&1 | tee "$RUNNER_TEMP/$f.log" || true
             if grep -q "Some tests failed" "$RUNNER_TEMP/$f.log" || \
-               ! grep -qE "(All tests passed|[0-9]+ tests? passed)" "$RUNNER_TEMP/$f.log"; then
+               ! grep -qE "(All tests passed|[1-9][0-9]* tests? passed\.)" "$RUNNER_TEMP/$f.log"; then
               FAILED+=("$f")
               echo "::error::FAILED: $f"
             fi
@@ -560,7 +560,7 @@ jobs:
             OUTPUT=$(flutter test "integration_test/$f" -d windows 2>&1) || true
             echo "$OUTPUT"
             if echo "$OUTPUT" | grep -q "Some tests failed" || \
-               ! echo "$OUTPUT" | grep -qE "(All tests passed|[0-9]+ tests? passed)"; then
+               ! echo "$OUTPUT" | grep -qE "(All tests passed|[1-9][0-9]* tests? passed\.)"; then
               FAILED+=("$f")
               echo "::error::FAILED: $f"
             fi
