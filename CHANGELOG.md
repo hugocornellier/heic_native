@@ -1,3 +1,18 @@
+## 1.2.0
+
+* Android: no longer applies the Kotlin Gradle Plugin (KGP) itself, following
+  Flutter's [built-in Kotlin migration for plugin authors](https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors).
+  Flutter 3.44 and newer compile the plugin's Kotlin themselves (with built-in
+  Kotlin, or by applying KGP to the plugin when built-in Kotlin is off), so
+  Android builds on Flutter 3.50 no longer warn "Your app uses the following
+  plugins that apply Kotlin Gradle Plugin (KGP): heic_native". The plugin's Java
+  and Kotlin targets are now 17.
+* Requires Flutter 3.44 or newer (Dart 3.12), because the migration needs
+  KGP 2.0 or newer, which Flutter enforces from 3.44.
+* Example app: Android moved to Gradle 9.5.0, AGP 9.3.1 and Kotlin 2.4.20 (the
+  Flutter 3.50 template), and its Material widgets now come from
+  `package:material_ui`.
+
 ## 1.1.0
 
 * Complete the AGP 9 fix from 1.0.1. The previous guard applied `kotlin-android`

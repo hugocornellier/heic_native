@@ -9,7 +9,7 @@ buildscript {
 
     dependencies {
         classpath("com.android.tools.build:gradle:8.1.0")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.20")
     }
 }
 
@@ -22,28 +22,13 @@ rootProject.allprojects {
 
 apply plugin: "com.android.library"
 
-// Kotlin plugin selection across AGP versions. On AGP >= 9 with built-in Kotlin
-// enabled (the default), built-in Kotlin compiles the sources and KGP must NOT be
-// applied. But if built-in Kotlin is disabled (android.builtInKotlin=false, which
-// the Flutter AGP-9 migrator adds to consumer apps), KGP is the only Kotlin
-// compiler, so it MUST be applied; otherwise this plugin's Kotlin classes never
-// compile and the consumer app fails with "cannot find class HeicNativePlugin".
-// On AGP < 9 there is no built-in Kotlin, so KGP is always required.
-def agpMajor = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')[0] as int
-def builtInKotlinProperty = providers.gradleProperty("android.builtInKotlin").orNull
-def isBuiltInKotlinEnabled = agpMajor >= 9 && (builtInKotlinProperty == null || builtInKotlinProperty.toBoolean())
-def shouldApplyKotlinAndroidPlugin = agpMajor < 9 || !isBuiltInKotlinEnabled
-if (shouldApplyKotlinAndroidPlugin) {
-    apply plugin: "kotlin-android"
-}
-
 android {
     namespace = "com.hugocornellier.heic_native"
     compileSdk = 34
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
 
@@ -75,15 +60,8 @@ android {
 dependencies {
 }
 
-
-// Pin the Kotlin JVM target to match Java when a Kotlin compile task exists
-// (legacy KGP on AGP < 9, or built-in Kotlin on AGP >= 9). Guarded so an AGP 9
-// setup without built-in Kotlin (no kotlin extension) is skipped instead of
-// erroring on the kotlin {} DSL.
-if (project.extensions.findByName("kotlin") != null) {
-    kotlin {
-        compilerOptions {
-            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8
-        }
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }

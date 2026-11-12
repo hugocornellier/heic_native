@@ -39,12 +39,12 @@ class MethodChannelHeicNative extends HeicNativePlatform {
     int compressionLevel = 6,
     bool preserveMetadata = true,
   }) async {
-    final result =
-        await methodChannel.invokeMethod<Uint8List>('convertToBytes', {
-      'inputPath': inputPath,
-      'compressionLevel': compressionLevel.clamp(0, 9),
-      'preserveMetadata': preserveMetadata,
-    });
+    final result = await methodChannel
+        .invokeMethod<Uint8List>('convertToBytes', {
+          'inputPath': inputPath,
+          'compressionLevel': compressionLevel.clamp(0, 9),
+          'preserveMetadata': preserveMetadata,
+        });
     if (result == null) {
       throw PlatformException(
         code: 'conversion_failed',

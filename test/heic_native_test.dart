@@ -67,8 +67,11 @@ void main() {
     });
 
     test('convert passes custom compression level', () async {
-      await HeicNative.convert('/input.heic', '/output.png',
-          compressionLevel: 0);
+      await HeicNative.convert(
+        '/input.heic',
+        '/output.png',
+        compressionLevel: 0,
+      );
       expect(fakePlatform.lastCompressionLevel, 0);
     });
 

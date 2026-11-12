@@ -125,8 +125,9 @@ void main() {
     final sample = _samples[i];
     final label = 'sample${i + 1}';
 
-    testWidgets('convertToBytes $label returns valid PNG bytes',
-        (tester) async {
+    testWidgets('convertToBytes $label returns valid PNG bytes', (
+      tester,
+    ) async {
       final inputPath = await assetToTempFile(sample, '${label}_bytes.heic');
 
       final bytes = await HeicNative.convertToBytes(inputPath);
@@ -136,8 +137,10 @@ void main() {
   }
 
   testWidgets('convertToBytes with compressionLevel 0', (tester) async {
-    final inputPath =
-        await assetToTempFile(_samples[0], 'bytes_compress0.heic');
+    final inputPath = await assetToTempFile(
+      _samples[0],
+      'bytes_compress0.heic',
+    );
 
     final bytes = await HeicNative.convertToBytes(
       inputPath,
@@ -147,8 +150,10 @@ void main() {
   });
 
   testWidgets('convertToBytes with compressionLevel 9', (tester) async {
-    final inputPath =
-        await assetToTempFile(_samples[0], 'bytes_compress9.heic');
+    final inputPath = await assetToTempFile(
+      _samples[0],
+      'bytes_compress9.heic',
+    );
 
     final bytes = await HeicNative.convertToBytes(
       inputPath,
@@ -169,29 +174,31 @@ void main() {
 
   // ─── Compression comparison ───
 
-  testWidgets('compression 0 and 9 both produce valid PNGs of different sizes',
-      (tester) async {
-    final input0 = await assetToTempFile(_samples[0], 'cmp_test_0.heic');
-    final input9 = await assetToTempFile(_samples[0], 'cmp_test_9.heic');
+  testWidgets(
+    'compression 0 and 9 both produce valid PNGs of different sizes',
+    (tester) async {
+      final input0 = await assetToTempFile(_samples[0], 'cmp_test_0.heic');
+      final input9 = await assetToTempFile(_samples[0], 'cmp_test_9.heic');
 
-    final bytes0 = await HeicNative.convertToBytes(
-      input0,
-      compressionLevel: 0,
-    );
-    final bytes9 = await HeicNative.convertToBytes(
-      input9,
-      compressionLevel: 9,
-    );
+      final bytes0 = await HeicNative.convertToBytes(
+        input0,
+        compressionLevel: 0,
+      );
+      final bytes9 = await HeicNative.convertToBytes(
+        input9,
+        compressionLevel: 9,
+      );
 
-    // Both must be valid PNGs.
-    expect(bytes0.sublist(0, 4), equals(_pngMagic));
-    expect(bytes9.sublist(0, 4), equals(_pngMagic));
-    // On Linux/Windows, level 0 is strictly larger. On iOS/macOS the
-    // relationship can invert because compression level only controls the
-    // PNG row filter, not the zlib level. Just verify both are non-empty.
-    expect(bytes0.length, greaterThan(100));
-    expect(bytes9.length, greaterThan(100));
-  });
+      // Both must be valid PNGs.
+      expect(bytes0.sublist(0, 4), equals(_pngMagic));
+      expect(bytes9.sublist(0, 4), equals(_pngMagic));
+      // On Linux/Windows, level 0 is strictly larger. On iOS/macOS the
+      // relationship can invert because compression level only controls the
+      // PNG row filter, not the zlib level. Just verify both are non-empty.
+      expect(bytes0.length, greaterThan(100));
+      expect(bytes9.length, greaterThan(100));
+    },
+  );
 
   // ─── convert() and convertToBytes() produce same image ───
 
@@ -231,60 +238,68 @@ void main() {
     expect(withoutMeta.sublist(0, 4), equals(_pngMagic));
 
     // With metadata should be larger (ICC profile and/or EXIF add bytes).
-    expect(withMeta.length, greaterThan(withoutMeta.length),
-        reason: 'PNG with metadata should be larger than without');
+    expect(
+      withMeta.length,
+      greaterThan(withoutMeta.length),
+      reason: 'PNG with metadata should be larger than without',
+    );
 
     // The metadata-preserved PNG should contain at least one metadata chunk.
     final metaChunks = _findPngChunkTypes(withMeta);
     final metadataChunkTypes = {'iCCP', 'eXIf', 'tEXt', 'iTXt', 'zTXt', 'sRGB'};
     final hasMetaChunk = metaChunks.any((c) => metadataChunkTypes.contains(c));
 
-    expect(hasMetaChunk, isTrue,
-        reason:
-            'Expected iCCP, eXIf, sRGB, or text chunk in metadata-preserved '
-            'PNG (found chunks: $metaChunks)');
+    expect(
+      hasMetaChunk,
+      isTrue,
+      reason:
+          'Expected iCCP, eXIf, sRGB, or text chunk in metadata-preserved '
+          'PNG (found chunks: $metaChunks)',
+    );
   });
 
   // ─── Error cases ───
 
-  testWidgets('convert throws PlatformException for non-existent file',
-      (tester) async {
+  testWidgets('convert throws PlatformException for non-existent file', (
+    tester,
+  ) async {
     expect(
       () async => await HeicNative.convert('/nonexistent.heic', '/out.png'),
       throwsA(isA<PlatformException>()),
     );
   });
 
-  testWidgets('convertToBytes throws PlatformException for non-existent file',
-      (tester) async {
+  testWidgets('convertToBytes throws PlatformException for non-existent file', (
+    tester,
+  ) async {
     expect(
       () async => await HeicNative.convertToBytes('/nonexistent.heic'),
       throwsA(isA<PlatformException>()),
     );
   });
 
-  testWidgets('convert throws ArgumentError for empty inputPath',
-      (tester) async {
+  testWidgets('convert throws ArgumentError for empty inputPath', (
+    tester,
+  ) async {
     expect(
       () => HeicNative.convert('', '/out.png'),
       throwsA(isA<ArgumentError>()),
     );
   });
 
-  testWidgets('convert throws ArgumentError for empty outputPath',
-      (tester) async {
+  testWidgets('convert throws ArgumentError for empty outputPath', (
+    tester,
+  ) async {
     expect(
       () => HeicNative.convert('/in.heic', ''),
       throwsA(isA<ArgumentError>()),
     );
   });
 
-  testWidgets('convertToBytes throws ArgumentError for empty inputPath',
-      (tester) async {
-    expect(
-      () => HeicNative.convertToBytes(''),
-      throwsA(isA<ArgumentError>()),
-    );
+  testWidgets('convertToBytes throws ArgumentError for empty inputPath', (
+    tester,
+  ) async {
+    expect(() => HeicNative.convertToBytes(''), throwsA(isA<ArgumentError>()));
   });
 }
 
@@ -294,7 +309,8 @@ List<String> _findPngChunkTypes(List<int> bytes) {
   // Skip 8-byte PNG signature.
   var offset = 8;
   while (offset + 8 <= bytes.length) {
-    final length = (bytes[offset] << 24) |
+    final length =
+        (bytes[offset] << 24) |
         (bytes[offset + 1] << 16) |
         (bytes[offset + 2] << 8) |
         bytes[offset + 3];

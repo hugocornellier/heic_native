@@ -16,13 +16,13 @@ void main() {
   test('convert returns true', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-      if (methodCall.method == 'convert') {
-        expect(methodCall.arguments['inputPath'], '/input.heic');
-        expect(methodCall.arguments['outputPath'], '/output.png');
-        return true;
-      }
-      return null;
-    });
+          if (methodCall.method == 'convert') {
+            expect(methodCall.arguments['inputPath'], '/input.heic');
+            expect(methodCall.arguments['outputPath'], '/output.png');
+            return true;
+          }
+          return null;
+        });
 
     expect(await platform.convert('/input.heic', '/output.png'), true);
   });
@@ -30,13 +30,13 @@ void main() {
   test('convert passes compression level and metadata flag', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-      if (methodCall.method == 'convert') {
-        expect(methodCall.arguments['compressionLevel'], 9);
-        expect(methodCall.arguments['preserveMetadata'], false);
-        return true;
-      }
-      return null;
-    });
+          if (methodCall.method == 'convert') {
+            expect(methodCall.arguments['compressionLevel'], 9);
+            expect(methodCall.arguments['preserveMetadata'], false);
+            return true;
+          }
+          return null;
+        });
 
     expect(
       await platform.convert(
@@ -52,12 +52,12 @@ void main() {
   test('convert clamps compression level', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-      if (methodCall.method == 'convert') {
-        expect(methodCall.arguments['compressionLevel'], 9);
-        return true;
-      }
-      return null;
-    });
+          if (methodCall.method == 'convert') {
+            expect(methodCall.arguments['compressionLevel'], 9);
+            return true;
+          }
+          return null;
+        });
 
     expect(
       await platform.convert(
@@ -74,12 +74,12 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-      if (methodCall.method == 'convertToBytes') {
-        expect(methodCall.arguments['inputPath'], '/input.heic');
-        return expectedBytes;
-      }
-      return null;
-    });
+          if (methodCall.method == 'convertToBytes') {
+            expect(methodCall.arguments['inputPath'], '/input.heic');
+            return expectedBytes;
+          }
+          return null;
+        });
 
     expect(await platform.convertToBytes('/input.heic'), equals(expectedBytes));
   });
@@ -87,13 +87,13 @@ void main() {
   test('convertToBytes passes options', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-      if (methodCall.method == 'convertToBytes') {
-        expect(methodCall.arguments['compressionLevel'], 0);
-        expect(methodCall.arguments['preserveMetadata'], false);
-        return Uint8List.fromList([1]);
-      }
-      return null;
-    });
+          if (methodCall.method == 'convertToBytes') {
+            expect(methodCall.arguments['compressionLevel'], 0);
+            expect(methodCall.arguments['preserveMetadata'], false);
+            return Uint8List.fromList([1]);
+          }
+          return null;
+        });
 
     expect(
       await platform.convertToBytes(
@@ -108,8 +108,8 @@ void main() {
   test('convertToBytes throws on null result', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-      return null;
-    });
+          return null;
+        });
 
     expect(
       () => platform.convertToBytes('/input.heic'),
