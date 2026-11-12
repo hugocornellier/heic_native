@@ -306,9 +306,12 @@ jobs:
       # the Dart VM Service connection (simulators.dart has no timeout on
       # that await). Use a retry loop with process cleanup and simulator
       # reboot, same defensive pattern as the macOS job.
+      # Every command in the loop is bounded so the step's own timeout is
+      # never reached: a hit step timeout kills the job with no retry and
+      # no diagnostics (CI on main, 2026-06-30).
       - name: Run integration tests on iOS simulator
         working-directory: example
-        timeout-minutes: 15
+        timeout-minutes: 30
         run: |
           set -e
           MAX_ATTEMPTS=3
@@ -325,7 +328,7 @@ jobs:
             # than burn the full step timeout on a single hung attempt.
             LOG_FILE="$RUNNER_TEMP/ios_test_attempt_${attempt}.log"
             set +e
-            timeout 240 flutter test integration_test/ -d "$DEVICE_ID" \
+            timeout -k 20 240 flutter test integration_test/ -d "$DEVICE_ID" \
               --no-pub --reporter expanded 2>&1 | tee "$LOG_FILE"
             EXIT_CODE=${PIPESTATUS[0]}
             set -e
@@ -341,13 +344,13 @@ jobs:
             fi
             echo "No test output or VM connection hang. Retrying..."
             # Reboot the simulator for a clean slate.
-            xcrun simctl shutdown "$DEVICE_ID" 2>/dev/null || true
-            xcrun simctl erase "$DEVICE_ID" 2>/dev/null || true
+            timeout -k 10 60 xcrun simctl shutdown "$DEVICE_ID" 2>/dev/null || true
+            timeout -k 10 60 xcrun simctl erase "$DEVICE_ID" 2>/dev/null || true
             sleep 2
-            xcrun simctl boot "$DEVICE_ID"
-            xcrun simctl bootstatus "$DEVICE_ID" -b
+            timeout -k 10 60 xcrun simctl boot "$DEVICE_ID"
+            timeout -k 10 180 xcrun simctl bootstatus "$DEVICE_ID" -b
             open -a Simulator --args -CurrentDeviceUDID "$DEVICE_ID"
-            xcrun simctl launch "$DEVICE_ID" com.apple.Preferences || true
+            timeout -k 10 60 xcrun simctl launch "$DEVICE_ID" com.apple.Preferences || true
             sleep 5
           done
           echo "All $MAX_ATTEMPTS attempts failed."
