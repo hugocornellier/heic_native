@@ -12,6 +12,8 @@
 * Example app: Android moved to Gradle 9.5.0, AGP 9.3.1 and Kotlin 2.4.20 (the
   Flutter 3.50 template), and its Material widgets now come from
   `package:material_ui`.
+* Linux: the native unit tests built with the example fetch googletest 1.16
+  instead of 1.11, which CMake 4 no longer configures.
 
 ## 1.1.0
 
