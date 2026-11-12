@@ -144,48 +144,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up vcpkg
-        uses: lukka/run-vcpkg@v11
-        with:
-          vcpkgGitCommitId: 'b5d1a94fb7f88fd835e360fd23a45a09ceedbf48'
-
-      - name: Install native dependencies via vcpkg
-        run: vcpkg install libheif[core]:x64-windows libpng:x64-windows
-
-      - name: Copy native deps to third_party
-        shell: pwsh
-        run: |
-          $vcpkgRoot = $env:VCPKG_ROOT
-          if (-not $vcpkgRoot) { $vcpkgRoot = "$env:GITHUB_WORKSPACE/vcpkg" }
-          $installed = "$vcpkgRoot/installed/x64-windows"
-
-          $destInclude = "windows/third_party/include"
-          $destLib = "windows/third_party/lib"
-          $destBin = "windows/third_party/bin"
-
-          New-Item -ItemType Directory -Force -Path $destInclude/libheif
-          New-Item -ItemType Directory -Force -Path $destLib
-          New-Item -ItemType Directory -Force -Path $destBin
-
-          Copy-Item "$installed/include/libheif/*.h" "$destInclude/libheif/"
-          Copy-Item "$installed/include/png.h" "$destInclude/"
-          Copy-Item "$installed/include/pngconf.h" "$destInclude/"
-          Copy-Item "$installed/include/pnglibconf.h" "$destInclude/"
-          Copy-Item "$installed/include/zlib.h" "$destInclude/"
-          Copy-Item "$installed/include/zconf.h" "$destInclude/"
-
-          Copy-Item "$installed/lib/heif.lib" "$destLib/"
-          Copy-Item "$installed/lib/de265.lib" "$destLib/" -ErrorAction SilentlyContinue
-          Copy-Item "$installed/lib/libde265.lib" "$destLib/de265.lib" -ErrorAction SilentlyContinue
-          Copy-Item "$installed/lib/libpng16.lib" "$destLib/"
-          Copy-Item "$installed/lib/zlib.lib" "$destLib/"
-
-          Copy-Item "$installed/bin/heif.dll" "$destBin/"
-          Copy-Item "$installed/bin/libde265.dll" "$destBin/" -ErrorAction SilentlyContinue
-          Copy-Item "$installed/bin/de265.dll" "$destBin/libde265.dll" -ErrorAction SilentlyContinue
-          Copy-Item "$installed/bin/libpng16.dll" "$destBin/"
-          Copy-Item "$installed/bin/zlib1.dll" "$destBin/"
-
+      # Build against the committed windows/third_party DLLs, the bytes pub.dev
+      # ships. A libde265 rebuilt by vcpkg with the windows-latest compiler
+      # (VS 2026) crashes in de265_init when heif.dll loads, so the app never
+      # starts. The committed build does not.
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -491,48 +453,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up vcpkg
-        uses: lukka/run-vcpkg@v11
-        with:
-          vcpkgGitCommitId: 'b5d1a94fb7f88fd835e360fd23a45a09ceedbf48'
-
-      - name: Install native dependencies via vcpkg
-        run: vcpkg install libheif[core]:x64-windows libpng:x64-windows
-
-      - name: Copy native deps to third_party
-        shell: pwsh
-        run: |
-          $vcpkgRoot = $env:VCPKG_ROOT
-          if (-not $vcpkgRoot) { $vcpkgRoot = "$env:GITHUB_WORKSPACE/vcpkg" }
-          $installed = "$vcpkgRoot/installed/x64-windows"
-
-          $destInclude = "windows/third_party/include"
-          $destLib = "windows/third_party/lib"
-          $destBin = "windows/third_party/bin"
-
-          New-Item -ItemType Directory -Force -Path $destInclude/libheif
-          New-Item -ItemType Directory -Force -Path $destLib
-          New-Item -ItemType Directory -Force -Path $destBin
-
-          Copy-Item "$installed/include/libheif/*.h" "$destInclude/libheif/"
-          Copy-Item "$installed/include/png.h" "$destInclude/"
-          Copy-Item "$installed/include/pngconf.h" "$destInclude/"
-          Copy-Item "$installed/include/pnglibconf.h" "$destInclude/"
-          Copy-Item "$installed/include/zlib.h" "$destInclude/"
-          Copy-Item "$installed/include/zconf.h" "$destInclude/"
-
-          Copy-Item "$installed/lib/heif.lib" "$destLib/"
-          Copy-Item "$installed/lib/de265.lib" "$destLib/" -ErrorAction SilentlyContinue
-          Copy-Item "$installed/lib/libde265.lib" "$destLib/de265.lib" -ErrorAction SilentlyContinue
-          Copy-Item "$installed/lib/libpng16.lib" "$destLib/"
-          Copy-Item "$installed/lib/zlib.lib" "$destLib/"
-
-          Copy-Item "$installed/bin/heif.dll" "$destBin/"
-          Copy-Item "$installed/bin/libde265.dll" "$destBin/" -ErrorAction SilentlyContinue
-          Copy-Item "$installed/bin/de265.dll" "$destBin/libde265.dll" -ErrorAction SilentlyContinue
-          Copy-Item "$installed/bin/libpng16.dll" "$destBin/"
-          Copy-Item "$installed/bin/zlib1.dll" "$destBin/"
-
+      # Build against the committed windows/third_party DLLs, the bytes pub.dev
+      # ships. A libde265 rebuilt by vcpkg with the windows-latest compiler
+      # (VS 2026) crashes in de265_init when heif.dll loads, so the app never
+      # starts. The committed build does not.
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
