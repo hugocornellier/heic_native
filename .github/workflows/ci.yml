@@ -273,10 +273,25 @@ jobs:
       # no diagnostics (CI on main, 2026-06-30).
       - name: Run integration tests on iOS simulator
         working-directory: example
-        timeout-minutes: 30
+        timeout-minutes: 40
         run: |
           set -e
           MAX_ATTEMPTS=3
+          # Shut the simulator down, erase it and boot it again. The first
+          # boot after an erase can take over three minutes on these runners,
+          # so bootstatus gets seven. A reboot that still fails is reported
+          # and the next attempt runs anyway, so the step ends with the
+          # loop's own report rather than set -e or the step timeout.
+          reboot_simulator() {
+            timeout -k 10 60 xcrun simctl shutdown "$DEVICE_ID" 2>/dev/null || true
+            timeout -k 10 60 xcrun simctl erase "$DEVICE_ID" 2>/dev/null || true
+            sleep 2
+            timeout -k 10 60 xcrun simctl boot "$DEVICE_ID" || return 1
+            timeout -k 10 420 xcrun simctl bootstatus "$DEVICE_ID" -b || return 1
+            open -a Simulator --args -CurrentDeviceUDID "$DEVICE_ID"
+            timeout -k 10 60 xcrun simctl launch "$DEVICE_ID" com.apple.Preferences || true
+            sleep 5
+          }
           for attempt in $(seq 1 $MAX_ATTEMPTS); do
             echo "========================================="
             echo "Attempt $attempt of $MAX_ATTEMPTS"
@@ -304,16 +319,17 @@ jobs:
               echo "Tests ran but had failures, not retrying."
               exit 1
             fi
-            echo "No test output or VM connection hang. Retrying..."
-            # Reboot the simulator for a clean slate.
-            timeout -k 10 60 xcrun simctl shutdown "$DEVICE_ID" 2>/dev/null || true
-            timeout -k 10 60 xcrun simctl erase "$DEVICE_ID" 2>/dev/null || true
-            sleep 2
-            timeout -k 10 60 xcrun simctl boot "$DEVICE_ID"
-            timeout -k 10 180 xcrun simctl bootstatus "$DEVICE_ID" -b
-            open -a Simulator --args -CurrentDeviceUDID "$DEVICE_ID"
-            timeout -k 10 60 xcrun simctl launch "$DEVICE_ID" com.apple.Preferences || true
-            sleep 5
+            echo "No test output or VM connection hang."
+            if [ "$attempt" -eq "$MAX_ATTEMPTS" ]; then
+              break
+            fi
+            # Reboot the simulator for a clean slate, then retry.
+            REBOOT_START=$SECONDS
+            if reboot_simulator; then
+              echo "Simulator rebooted in $((SECONDS - REBOOT_START)) s. Retrying..."
+            else
+              echo "::warning::Simulator reboot did not finish in $((SECONDS - REBOOT_START)) s. Retrying anyway..."
+            fi
           done
           echo "All $MAX_ATTEMPTS attempts failed."
           for i in $(seq 1 $MAX_ATTEMPTS); do
