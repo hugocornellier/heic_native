@@ -215,7 +215,7 @@ jobs:
   integration-ios:
     name: Integration iOS
     runs-on: macos-15
-    timeout-minutes: 60
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v5
 
@@ -273,7 +273,7 @@ jobs:
       # no diagnostics (CI on main, 2026-06-30).
       - name: Run integration tests on iOS simulator
         working-directory: example
-        timeout-minutes: 40
+        timeout-minutes: 50
         run: |
           set -e
           MAX_ATTEMPTS=3
@@ -300,12 +300,15 @@ jobs:
             pkill -9 -f "Runner" 2>/dev/null || true
             pkill -9 -f "Flutter" 2>/dev/null || true
             sleep 2
-            # Run with a 4-minute timeout per attempt, if the VM
-            # connection hangs, we want to kill and retry quickly rather
-            # than burn the full step timeout on a single hung attempt.
+            # Bound each attempt so a hung VM connection is killed and
+            # retried rather than burning the whole step. The first
+            # flutter test of a job, and the first after a simulator erase,
+            # spends up to three minutes building and installing the app
+            # before any test runs, so four minutes killed healthy attempts.
+            # Each attempt gets seven.
             LOG_FILE="$RUNNER_TEMP/ios_test_attempt_${attempt}.log"
             set +e
-            timeout -k 20 240 flutter test integration_test/ -d "$DEVICE_ID" \
+            timeout -k 20 420 flutter test integration_test/ -d "$DEVICE_ID" \
               --no-pub --reporter expanded 2>&1 | tee "$LOG_FILE"
             EXIT_CODE=${PIPESTATUS[0]}
             set -e
