@@ -210,7 +210,29 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
           working-directory: example
-          script: flutter test integration_test/ -d emulator-5554
+          # flutter test starts the app right after it installs it. On a fresh
+          # install, an emulator still busy after its first boot can handle
+          # the install broadcast seconds later and recreate the activity
+          # under the running test: a second Flutter engine starts, and
+          # flutter test then waits without end (at test 15, "convert and
+          # convertToBytes produce same PNG", until the job timeout; 4 of 80
+          # runs in run 43274502299, every one with two engine starts). So the
+          # debug APK is built and installed first, and the script waits until
+          # no install is under way and the broadcast queue has drained (the
+          # same wait as flutter_litert's CI). flutter test's own install is
+          # then an update of an app whose install broadcasts were already
+          # handled. 130 of 130 runs passed this way (run 43278336149).
+          # One line on purpose: the action runs each script line as its own
+          # sh command, which tears a multi-line loop apart.
+          script: >-
+            bash -c 'set -e;
+            flutter build apk --debug;
+            adb -s emulator-5554 install -r build/app/outputs/flutter-apk/app-debug.apk;
+            for i in $(seq 1 36); do
+            [ "$(adb -s emulator-5554 shell dumpsys package installs | sed -n "/Active install sessions/,/Finalized install sessions/p" | grep -c mCommitted=true)" = 0 ] && break;
+            echo "waiting for an install that is under way"; sleep 5; done;
+            timeout 300 adb -s emulator-5554 shell am wait-for-broadcast-idle;
+            flutter test integration_test/ -d emulator-5554'
 
   integration-ios:
     name: Integration iOS
